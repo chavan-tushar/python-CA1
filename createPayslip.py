@@ -52,7 +52,7 @@ with open("./Accounts/Hours.txt") as hrs:
 
         regHrs,overTimeHrs = 0,0
         if(hrsWorked > stdHrs):
-            regHrs = hrsWorked - stdHrs
+            regHrs = stdHrs
             overTimeHrs = hrsWorked - regHrs
         elif (hrsWorked > 0 and hrsWorked <= stdHrs ):
             regHrs = hrsWorked
