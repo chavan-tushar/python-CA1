@@ -2,6 +2,7 @@
 #To check if Payslips folder exits, if not then it will create that folder.
 import os
 
+
 path = "/home/tushar/StudyMaterial/python-CA1/Accounts/Payslips"
 if(not os.path.isdir(path)):
     os.makedirs(path)   #makedirs is used to create /Accounts/Payslips.
@@ -35,6 +36,10 @@ def getTaxRates():
             return stdRate,highRate
 
 
+
+weekwisePayDict = {}
+staffwisePayDict = {}
+
 with open("./Accounts/Hours.txt") as hrs:
     for data in hrs:
         dataInList = data.split()
@@ -42,11 +47,12 @@ with open("./Accounts/Hours.txt") as hrs:
         forStaffID = dataInList[1]
         hrsWorked = float(dataInList[2])
 
-        #Below code is used to convert DD/MM/YYYY into YYYY_MM_DD format.
+
+        #Convert DD/MM/YYYY into YYYY_MM_DD format.
         date, month, year = forWeek.split("/")
         formatedDate = "_".join([year, month, date])
 
-        #Below lines will call function and data will be stored in approriate variables
+        #Below lines will call functions and data will be stored in approriate variables
         surname, firstName, PPSNumber, stdHrs, hrRate, overTimeRate, taxCredit, stdBand = getStaffDetails(forStaffID)
         stdRate, highRate = getTaxRates()
 
@@ -91,3 +97,32 @@ with open("./Accounts/Hours.txt") as hrs:
             ps.writelines(f"Tax Credit\t\t{taxCredit}\n");
             ps.writelines(f"Net Deduction\t\t{netDeduction}\n");
             ps.writelines(f"Net Pay\t\t{netPay}\n");
+
+        #it will check if data for that week is already present in weekwisePayDict
+        #if data is present then it will add gross pay of current staff to gross pay and count of staff will be increase by 1
+        #if data is not present then it will add a list containing gross pay and initial count as 1 for that week.
+        if formatedDate in weekwisePayDict.keys():
+            weekwisePayDict[formatedDate][0] += grossPay
+            weekwisePayDict[formatedDate][1] += 1
+        else:
+            weekwisePayDict[formatedDate] = [grossPay, 1]
+
+
+        if forStaffID in staffwisePayDict.keys():
+            staffwisePayDict[forStaffID].append([formatedDate,grossPay])
+        else:
+            staffwisePayDict[forStaffID] = [[formatedDate, grossPay]]
+
+#to print weekly average gross pay
+for week,data in weekwisePayDict.items():
+    print(f"Weekly Average Gross Pay for all workers for week {week} is {data[0]/data[1]}")
+
+for staffID, payDetails in staffwisePayDict.items():
+    if(len(payDetails) >= 6 ):
+        payDetails.sort()
+        payForLastSixMonth = 0
+        for lastSixWeek, lastSixWeekPay in payDetails[-6:]:
+            payForLastSixMonth += lastSixWeekPay
+        print(f"Six-week rolling Average gross pay for {staffID} is {payForLastSixMonth/6}")
+
+print(staffwisePayDict)
