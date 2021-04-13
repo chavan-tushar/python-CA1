@@ -1,0 +1,22 @@
+
+				PAYSLIP
+
+
+StaffID: 123456
+Staff Name: John Doe
+PPSN: 1234567AF
+Date: 04/04/2021
+			Hours		Rate		Total
+Regular		37.0		20.0		740.0
+Overtime		10.0		30.0		300.0
+
+Gross Pay	1040.0
+
+					Rate		Total
+Standard Band		700.0		20.0%		140.0
+Higher Rate		340.0		40.0%		136.0
+
+Total Deductions	276.0
+Tax Credit		70.0
+Net Deduction		206.0
+Net Pay		834.0

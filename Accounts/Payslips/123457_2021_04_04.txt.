@@ -1,0 +1,22 @@
+
+				PAYSLIP
+
+
+StaffID: 123457
+Staff Name: Mary Smith
+PPSN: 1234589AJ
+Date: 04/04/2021
+			Hours		Rate		Total
+Regular		0.0		20.0		0.0
+Overtime		40.0		25.0		1000.0
+
+Gross Pay	1000.0
+
+					Rate		Total
+Standard Band		900.0		20.0%		180.0
+Higher Rate		100.0		40.0%		40.0
+
+Total Deductions	220.0
+Tax Credit		140.0
+Net Deduction		80.0
+Net Pay		920.0

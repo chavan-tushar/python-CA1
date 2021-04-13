@@ -1,2 +1,3 @@
+<StaffID>\t<Surname>\t<First Name(s)>\t<PPSNumber>\t<standard hours>\t<HourlyRate>\t<OvertimeRate>\t<taxcredit>\t<standardband>
 123456	Doe	John	1234567AF	37	20	30	70	700
 123457	Smith	Mary	1234589AJ	0	20	25	140	900

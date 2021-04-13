@@ -1,1 +1,2 @@
+<standardrate>	<higherrate>
 20	40

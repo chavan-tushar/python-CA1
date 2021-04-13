@@ -13,7 +13,6 @@ avgGrossPaypath = "/home/tushar/StudyMaterial/python-CA1/Accounts/AvgGrossPay"
 if(not os.path.isdir(avgGrossPaypath)):
     os.makedirs(avgGrossPaypath)
 
-
 weekwisePayDict = {}
 staffwisePayDict = {}
 
@@ -23,9 +22,14 @@ currentDate = "_".join(str(datetime.datetime.today()).split()[0].split("-"))
 previousDate = "_".join(str(datetime.datetime.today() - datetime.timedelta(days=42)).split()[0].split("-"))
 staffIDwithError = []
 
+#Creating Blank Error File.
+with open(f"./Accounts/Errors_{currentDate}.txt","w") as err:
+    pass
+
 #This function will read the data from Employees.txt file.
 def getStaffDetails(staffID):
     with open("./Accounts/Employees.txt") as empData:
+        next(empData)
         for empDetails in empData:
             empDetailsList = empDetails.split()
 
@@ -45,6 +49,7 @@ def getStaffDetails(staffID):
 #This function will read the data from Taxrates.txt
 def getTaxRates():
     with open("./Accounts/Taxrates.txt") as tr:
+        next(tr)
         for data in tr:
             taxRate = data.split()
             stdRate = float(taxRate[0])
@@ -65,7 +70,9 @@ def writeError(*args):
 #It will be a starting point of the code.
 #Every Record from Hours.txt file will be checked in Employees.txt file and Payslip will be generated.
 with open("./Accounts/Hours.txt") as hrs:
+    next(hrs)
     for data in hrs:
+
         dataInList = data.split()
         forWeek = dataInList[0]
         forStaffID = dataInList[1]
@@ -81,7 +88,7 @@ with open("./Accounts/Hours.txt") as hrs:
             except ValueError:
                 # StaffID is not added in staffIDwithError list as
                 #there might be another record for same employee in Hours.txt with correct/required date format.
-                writeError(forStaffID, "Payslip Not Generated, Reason - Incorrect Date Format in Hours.txt file")
+                writeError(forStaffID, f"Payslip Not Generated for week {forWeek}, Reason - Incorrect Date Format in Hours.txt file")
                 continue
 
             formatedDate = "_".join([year, month, date])
@@ -132,10 +139,10 @@ with open("./Accounts/Hours.txt") as hrs:
                 overTimeHrs = hrsWorked
 
             if regHrs > hrsWorked or regHrs > stdHrs:
-                writeError(forStaffID, "Payslip Not Generated, Reason - Regular Hours greater than Standard Hours or Hours Worked")
+                writeError(forStaffID, f"Payslip Not Generated  for week {forWeek}, Reason - Regular Hours greater than Standard Hours or Hours Worked")
                 break
             elif overTimeHrs < 0:
-                writeError(forStaffID,"Payslip Not Generated, Reason - Negative overtime hours")
+                writeError(forStaffID,f"Payslip Not Generated  for week {forWeek}, Reason - Negative overtime hours")
                 break
 
             #Creating payslips
@@ -155,15 +162,15 @@ with open("./Accounts/Hours.txt") as hrs:
 
 
                 if partOfSalForStdRate > stdBand or partOfSalForStdRate > grossPay or partOfSalForStdRate <= 0 or partOfSalForStdRate > grossPay:
-                    writeError(forStaffID,"Payslip Not Generated, Reason - Incorrect Standard Band")
+                    writeError(forStaffID,f"Payslip Not Generated  for week {forWeek}, Reason - Incorrect Standard Band")
                     break
                 elif partOfSalForHighRate < 0 or partOfSalForHighRate > grossPay:
-                    writeError(forStaffID,"Payslip Not Generated, Reason - Incorrect Higher Rate")
+                    writeError(forStaffID,f"Payslip Not Generated  for week {forWeek}, Reason - Incorrect Higher Rate")
                     break
                 elif netDeduction < 0:
                     # it will never be less than 0 as while calculating its value is already being taken care.
                     # However it has been mentioned here just to be on a safer side.
-                    writeError(forStaffID, "Payslip Not Generated, Reason - Negative Net Deduction")
+                    writeError(forStaffID, f"Payslip Not Generated  for week {forWeek}, Reason - Negative Net Deduction")
                     break
 
                 #Printing a Payslip
@@ -185,7 +192,7 @@ with open("./Accounts/Hours.txt") as hrs:
                 ps.writelines(f"Net Pay\t\t{netPay}\n")
 
             #it will check if data for that week is already present in weekwisePayDict
-            #if data is present then it will add gross pay of current staff to gross pay and count of staff will be increase by 1
+            #if data is present then it will add gross pay of current staff to gross pay and count of staff will be increase by 1 for that week
             #if data is not present then it will add a list containing gross pay and initial count as 1 for that week.
             if formatedDate in weekwisePayDict.keys():
                 weekwisePayDict[formatedDate][0] += grossPay
@@ -193,27 +200,46 @@ with open("./Accounts/Hours.txt") as hrs:
             else:
                 weekwisePayDict[formatedDate] = [grossPay, 1]
 
-
+            #it will check if data for that staff is present in staffwisePayDict
+            #if it is present then it will append a list for date and gross pay for that week in list of list format.
+            #if it is not present then it will add a new item to dictionary with date and gross pay for that week for that staff.
             if forStaffID in staffwisePayDict.keys():
                 staffwisePayDict[forStaffID].append([formatedDate,grossPay])
             else:
                 staffwisePayDict[forStaffID] = [[formatedDate, grossPay]]
 
 #to print weekly average gross pay
-
+#it will read the data from weekwisePayDict. Items will provide key and value pair for week data and gross salary
+#data[0] is total of gross pay calculated for that staff and data[1] is total number of weeks that employee is worked.
 with open("./Accounts/AvgGrossPay/WeekwiseGrossPayForAllWorkers.txt", "w") as WGP:
     for week, data in weekwisePayDict.items():
-        #print(f"Weekly Average Gross Pay for all workers for week {week} is {data[0]/data[1]}")
         WGP.writelines(f"Weekly Average Gross Pay of all workers for week {week} is {data[0]/data[1]}\n")
 
+
+
+#to print rolling avg Staff wise Gross pay for staff who are working for more than 6 weeks in a company.
+#len(payDetailsForStaff) >= 6 is used to check if we have data for more than or equal to 6 weeks for that staff.
+#payDetailsForStaff.sort() will sort the data as week need to consider only 6 recent weeks for calculating rolling avg
+#payDetailsForStaff[-6] will consider only last 6 weeks data.
+#weekInLastSixWeeks >= previousDate is used to compare if date is within last 6 weeks.
 with open("./Accounts/AvgGrossPay/StaffwiseGrossPay.txt", "w") as SGP:
-    for staffID, payDetails in staffwisePayDict.items():
-        if len(payDetails) >= 2:
-            payDetails.sort()
+    for staffID, payDetailsForStaff in staffwisePayDict.items():
+        if len(payDetailsForStaff) >= 6:
+            payDetailsForStaff.sort()
             payForLastSixMonth = 0
-            for lastSixWeek, lastSixWeekPay in payDetails[-6:]:
-                if lastSixWeek >= previousDate:
-                    payForLastSixMonth += lastSixWeekPay
-            #print(f"Six-week rolling Average gross pay for {staffID} is {payForLastSixMonth/6}")
+            for weekInLastSixWeeks, payInlastSixWeeks in payDetailsForStaff[-6:]:
+                if weekInLastSixWeeks >= previousDate:
+                    payForLastSixMonth += payInlastSixWeeks
             SGP.writelines(f"Six-week rolling Average gross pay for Employee {staffID} is {payForLastSixMonth / 6}\n")
-print(staffwisePayDict)
+
+#Will be executed if no errors found while creating payslips.
+#it will first read the data in file and then it will write hence 'r+' is used.
+with open(f"./Accounts/Errors_{currentDate}.txt","r+") as err:
+    text = err.read()
+    if text == "":
+        err.writelines("No Errors Found !")
+
+print("Payslips are stored in 'Accounts/Payslips'\n"
+      "Average Gross Pay Data is stored in 'Accounts/AvgGrossPay'\n"
+      "Please check 'Error_YYYY_MM_DD.txt' file in 'Accounts' folder for errors(if any).\n"
+      "Thank you ! ")
