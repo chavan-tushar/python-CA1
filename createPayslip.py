@@ -1,11 +1,10 @@
-
-#To check if Payslips folder exits, if not then it will create that folder.
 import datetime
 import os
-import datetime
+
+payslipPath = "/home/tushar/StudyMaterial/python-CA1/Accounts/Payslips"
 
 # makedirs is used to create folder in hierarical order e.g /python-CA1/Accounts/Payslips.
-payslipPath = "/home/tushar/StudyMaterial/python-CA1/Accounts/Payslips"
+#To check if Payslips folder exits, if not then it will create that folder.
 if(not os.path.isdir(payslipPath)):
     os.makedirs(payslipPath)
 
