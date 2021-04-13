@@ -27,6 +27,7 @@ with open(f"./Accounts/Errors_{currentDate}.txt","w") as err:
     pass
 
 #This function will read the data from Employees.txt file.
+#next(empData) is used to skip the header row.
 def getStaffDetails(staffID):
     with open("./Accounts/Employees.txt") as empData:
         next(empData)
