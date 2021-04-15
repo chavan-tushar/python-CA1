@@ -1,16 +1,21 @@
 import datetime
 import os
 
-payslipPath = "/home/tushar/StudyMaterial/python-CA1/Accounts/Payslips"
-
 # makedirs is used to create folder in hierarical order e.g /python-CA1/Accounts/Payslips.
 #To check if Payslips folder exits, if not then it will create that folder.
-if(not os.path.isdir(payslipPath)):
-    os.makedirs(payslipPath)
+def createFolder(pathToCreateFolder):
+    if (not os.path.isdir(pathToCreateFolder)):
+        os.makedirs(pathToCreateFolder)
+
+
+payslipPath = "/home/tushar/StudyMaterial/python-CA1/Accounts/Payslips"
+createFolder(payslipPath)
 
 avgGrossPaypath = "/home/tushar/StudyMaterial/python-CA1/Accounts/AvgGrossPay"
-if(not os.path.isdir(avgGrossPaypath)):
-    os.makedirs(avgGrossPaypath)
+createFolder(avgGrossPaypath)
+
+errorPath = "/home/tushar/StudyMaterial/python-CA1/Accounts/Error"
+createFolder(errorPath)
 
 weekwisePayDict = {}
 staffwisePayDict = {}
@@ -22,7 +27,7 @@ previousDate = "_".join(str(datetime.datetime.today() - datetime.timedelta(days=
 staffIDwithError = []
 
 #Creating Blank Error File.
-with open(f"./Accounts/Errors_{currentDate}.txt","w") as err:
+with open(f"./Accounts/Error/Errors_{currentDate}.txt","w") as err:
     pass
 
 #This function will read the data from Employees.txt file.
@@ -61,7 +66,7 @@ def getTaxRates():
 #some rows will have only error message where as some rows will have staffID and Error Message
 #Hence *args is used as number of arguments are not fixed.
 def writeError(*args):
-    with open(f"./Accounts/Errors_{currentDate}.txt","a") as err:
+    with open(f"./Accounts/Errors/Errors_{currentDate}.txt","a") as err:
         if len(args) == 1:
             err.writelines(f"{args[0]}\n")
         elif len(args) == 2:
@@ -146,7 +151,9 @@ with open("./Accounts/Hours.txt") as hrs:
                 break
 
             #Creating payslips
-            with open(f"./Accounts/Payslips/{forStaffID}_{formatedDate}.txt.", "w") as ps:
+            basePath = f"./Accounts/Payslips/Week_{formatedDate}"
+            createFolder(basePath)
+            with open(f"{basePath}/{forStaffID}_{formatedDate}.txt", "w") as ps:
 
                 #Calculations to be used while printing Payslip
                 salFromRegHrs = regHrs*hrRate
@@ -234,12 +241,12 @@ with open("./Accounts/AvgGrossPay/StaffwiseGrossPay.txt", "w") as SGP:
 
 #Will be executed if no errors found while creating payslips.
 #it will first read the data in file and then it will write hence 'r+' is used.
-with open(f"./Accounts/Errors_{currentDate}.txt","r+") as err:
+with open(f"{errorPath}/Errors_{currentDate}.txt","r+") as err:
     text = err.read()
     if text == "":
         err.writelines("No Errors Found !")
 
-print("Payslips are stored in 'Accounts/Payslips'\n"
-      "Average Gross Pay Data is stored in 'Accounts/AvgGrossPay'\n"
-      "Please check 'Error_YYYY_MM_DD.txt' file in 'Accounts' folder for errors(if any).\n"
+print("Payslips are stored in folder 'Accounts/Payslips_YYYY_MM_DD/Payslips'\n"
+      "Average Gross Pay Data is stored in folder 'Accounts/AvgGrossPay'\n"
+      "Please check 'Error_YYYY_MM_DD.txt' file in 'Accounts/Error' folder for errors(if any).\n"
       "Thank you ! ")
