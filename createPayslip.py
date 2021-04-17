@@ -34,6 +34,9 @@ with open(f"./Accounts/Error/Errors_{currentDate}.txt","w") as err:
 #next(empData) is used to skip the header row.
 def getStaffDetails(staffID):
     with open("./Accounts/Employees.txt") as empData:
+        # mydata = empData.readline()
+        # print(mydata)
+        # empData.seek(0)
         next(empData)
         for empDetails in empData:
             empDetailsList = empDetails.split()
@@ -151,7 +154,7 @@ with open("./Accounts/Hours.txt") as hrs:
                 break
 
             #Creating payslips
-            basePath = f"./Accounts/Payslips/Week_{formatedDate}"
+            basePath = f"{payslipPath}/Week_{formatedDate}"
             createFolder(basePath)
             with open(f"{basePath}/{forStaffID}_{formatedDate}.txt", "w") as ps:
 
@@ -229,9 +232,9 @@ with open("./Accounts/AvgGrossPay/WeekwiseGrossPayForAllWorkers.txt", "w") as WG
 #payDetailsForStaff.sort() will sort the data as week need to consider only 6 recent weeks for calculating rolling avg
 #payDetailsForStaff[-6] will consider only last 6 weeks data.
 #weekInLastSixWeeks >= previousDate is used to compare if date is within last 6 weeks.
-with open("./Accounts/AvgGrossPay/StaffwiseGrossPay.txt", "w") as SGP:
+with open(f"{avgGrossPaypath}/StaffwiseGrossPay.txt", "w") as SGP:
     for staffID, payDetailsForStaff in staffwisePayDict.items():
-        if len(payDetailsForStaff) >= 6:
+        if len(payDetailsForStaff) >= 2:
             payDetailsForStaff.sort()
             payForLastSixMonth = 0
             for weekInLastSixWeeks, payInlastSixWeeks in payDetailsForStaff[-6:]:
